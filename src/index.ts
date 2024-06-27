@@ -8,11 +8,13 @@ import battlesRouter from "./routes/battlesRoutes";
 import standingsRouter from "./routes/standingsRoutes";
 import teamsRouter from "./routes/teamsRoutes";
 
+console.log("Hello, World!");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-const mongoURI = 'mongodb+srv://aphb2024:kIqjYFK6CMpBqmEe@cluster0.qforsle.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0';
+
+const mongoURI = process.env.MONGODB_URL || 'mongodb://localhost:27017/random';
 mongoose.connect(mongoURI)
 	.then(()=> console.log("Hip Hip Hooray! MongoDB Connected"))
 	.catch(err => console.log('X( MongoDB connection error: ', err));

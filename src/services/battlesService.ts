@@ -1,69 +1,80 @@
 import Battles from '../models/battlesModel';
-import Team from '../models/teamsModel';
-import any = jasmine.any;
+import Team, { ITeams } from '../models/teamsModel';
 
-export const getBattleById = async (battleId: string) => {
-    return await Battles.findById(battleId).exec();
-};
+// export const getBattleById = async (battleId: string) => {
+//     return await Battles.findById(battleId).exec();
+// };
 
-export const createBattle = async (battle: typeof Battles) => {
-    return await battle.save();
+// export const createBattle = async (battle: typeof Battles) => {
+//     return await battle.save();
+// };
+
+export const getBattles = async () => {
+    return await Battles.find().exec();
 };
 
 export const updateBattleDetails = async (battleId: string, BattleData: Partial<typeof Battles>) => {
     return await Battles.findByIdAndUpdate(battleId, BattleData, {new: true}).exec();
 };
 
-export const deleteBattle = async (battleId: string) => {
-    const battle = await Battles.findById(battleId).exec();
-    if(battle){
-        await battle.remove();
-        return true;
+// export const deleteBattle = async (battleId: string) => {
+//     const battle = await Battles.findById(battleId).exec();
+//     if(battle){
+//         await battle.remove();
+//         return true;
+//     }
+//     return false;
+// };
+
+
+export const arrangeTeamsIntoBattles = async (
+    divisions: 2 | 4 = 2,
+    tour: number = 1
+): Promise<InstanceType<typeof Battles>[]> => {
+    const teams: InstanceType<typeof Team>[] = await Team.find()
+        .sort({ score: -1 })
+        .exec();
+
+    if (teams.length % 2 !== 0) {
+        // const juryTeam = await createJuryTeam(); // Assuming you have this function implemented
+        // teams.push(juryTeam);
     }
-    return false;
-};
+
+    const splitPoints: number[] = [0];
+    const chunkSize = Math.floor(teams.length / divisions);
+    for (let i = 0; i < divisions; i++) {
+        if (divisions === 4 && teams.length % 4 === 2 && (i === 1 || i === 3)) {
+            splitPoints.push(splitPoints[splitPoints.length - 1] + chunkSize + 1);
+        }
+        splitPoints.push(splitPoints[splitPoints.length - 1] + chunkSize);
+    }
+
+    const teamChunks: ITeams[][] = [];
+    for (let i = 0; i < splitPoints.length - 1; i++) {
+        const start = splitPoints[i];
+        const end = splitPoints[i + 1];
 
 
-export const arrangeTeamsIntoBattles = async () => {
-    // Fetch all teams from the database and sort them by score in descending order
-    const teams = await Team.find().sort({ score: -1 }).exec();
+        teamChunks.push(teams.slice(start, end));
+    }
 
-    // Log the sorted teams for debugging purposes (optional)
-    console.log('Sorted teams by score:', teams);
-
-    // Split the teams into two halves
-    const midIndex = Math.ceil(teams.length / 2); // Using Math.ceil to handle odd number of teams
-    const firstHalf = teams.slice(0, midIndex);
-    const secondHalf = teams.slice(midIndex);
-
-    // Prepare an array to hold the battle pairs
     const battles: InstanceType<typeof Battles>[] = [];
+    for (let i = 0; i < teamChunks[0].length; i++) {
+        const battleTeams = teamChunks.map(chunk => ({
+            name1: chunk[i]?.name || 'BYE',
+            name2: chunk[i + 1]?.name || 'BYE'
+        }));
 
-    // Pair the top team from the first half with the top team from the second half
-    for (let i = 0; i < Math.min(firstHalf.length, secondHalf.length); i++) {
-        const battle = new Battles({
-            tour: 1, // Assuming tour is 1 for simplicity
-            room: `Room-${i + 1}`, // Generating room names dynamically
-            teams: [
-                {
-                    name1: firstHalf[i].name,
-                    name2: secondHalf[i].name,
-                }
-            ],
-            result: 0, // Initial result, assuming no result yet
-            points: [
-                {
-                    pts1: 0, // Initial points, assuming no points yet
-                    pts2: 0, // Initial points, assuming no points yet
-                }
-            ]
-        });
-        battles.push(battle);
+    const battle = new Battles({
+        tour,
+        room: `Room-${i + 1}`,
+        teams: battleTeams,
+        result: 0,
+        points: battleTeams.map(() => ({ pts1: 0, pts2: 0 }))
+    });
+    battles.push(battle);
     }
 
-    // Save battles to the database
     await Battles.insertMany(battles);
-
-    // Return the created battles
     return battles;
 };
