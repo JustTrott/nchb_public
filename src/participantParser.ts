@@ -9,10 +9,11 @@ interface ParticipantRaw {
 interface Participant {
 	name: string;
 	league: string;
-	score: number;
+	qualPoints: number;
 }
 
-async function parseParticipants() {
+async function parseParticipants(): Promise<Participant[]>
+{
 	const spreadsheetId = "1Uc6rHz9mqVQVW12p_7UXeB9s0nO_c1DJR6UMtuukrJU";
 	const GId = "2055939208";
 
@@ -26,10 +27,13 @@ async function parseParticipants() {
 		const {
 			Название: name,
 			Лига: league,
-			"Балл за отбор": score,
+			"Балл за отбор": qualPoints,
 		} = participant;
-		return { name, league, score };
+		return { name, league, qualPoints };
 	});
+
+	// shuffle participants to make it more random
+	participants.sort(() => Math.random() - 0.5);
 	return participants as Participant[];
 }
 

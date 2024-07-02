@@ -1,11 +1,17 @@
 import { Router } from 'express';
-import { getStandingsList } from '../controllers/standingController'
+import StandingsController from '../controllers/standingsController'
+import StandingsService from '../services/standingsService';
 
 const standingsRouter = Router();
 
-standingsRouter.get('/', getStandingsList);
-// standingsRouter.post('/', addStanding);
-// standingsRouter.put('/:id', updateStanding);
-// standingsRouter.delete('/:id', removeStanding);
+const standingsService = new StandingsService();
+const standingsController = new StandingsController(standingsService);
+
+standingsRouter.get('/', standingsController.getStandingsList);
+standingsRouter.get('/league/:league', standingsController.getStandingsByLeague);
+standingsRouter.put('/:id', standingsController.updateStandingTotal);
+standingsRouter.put('/:id/buhgolts', standingsController.updateStandingBuhgolts);
+standingsRouter.put('/:id/disqualify', standingsController.disqualifyStanding);
+standingsRouter.post('/league/:league/start', standingsController.startNewTour);
 
 export default standingsRouter;

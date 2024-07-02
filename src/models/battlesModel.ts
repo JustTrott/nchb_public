@@ -1,36 +1,25 @@
 import mongoose from "mongoose";
+import { IStandings } from "./standingsModel";
 
-interface IBattle extends mongoose.Document {
+export interface IBattles extends mongoose.Document {
 	tour: number;
 	room: string;
-	teams: {
-		name1: string;
-		name2: string;
-	}[];
-	result: number;
-	points: {
-		pts1: number;
-		pts2: number;
-	}[];
+	teams: IStandings[];
+	jury?: {
+		specificTeams: IStandings[];
+	}
+	points: number[];
 }
 
 const BattlesSchema = new mongoose.Schema({
 	tour: { type: Number, required: true },
 	room: { type: String, required: true },
-	teams: [
-		{
-			name1: { type: String, required: true },
-			name2: { type: String, required: true },
-		},
-	],
-	result: { type: Number, required: true },
-	points: [
-		{
-			pts1: { type: Number, required: true },
-			pts2: { type: Number, required: true },
-		},
-	],
+	teams: { type: [mongoose.Schema.Types.ObjectId], required: true, ref: "Standings" },
+	jury: {type: {
+		specificTeams: { type: [mongoose.Schema.Types.ObjectId], ref: "Standings" }
+	}, required: false},
+	points: {type: [Number], default: [0, 0]}
 });
 
-const Battles = mongoose.model<IBattle>("Battles", BattlesSchema);
+const Battles = mongoose.model<IBattles>("Battles", BattlesSchema);
 export default Battles;

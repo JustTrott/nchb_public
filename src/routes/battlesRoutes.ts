@@ -1,18 +1,15 @@
 import { Router } from "express";
-import {
-	// getBattle,
-	// addBattle,
-	// removeBattle,
-	getBattlesList,
-	updateBattle,
-} from "../controllers/battlesController";
+import BattlesService from "../services/battlesService";
+import BattlesController from "../controllers/battlesController";
 
 const battlesRouter = Router();
 
-battlesRouter.get("/", getBattlesList);
-// battlesRouter.get("/:id", getBattle);
-// battlesRouter.post("/", addBattle);
-battlesRouter.put("/:id", updateBattle);
-// battlesRouter.delete("/:id", removeBattle);
+const battlesService = new BattlesService();
+const battlesController = new BattlesController(battlesService);
+
+
+battlesRouter.get("/", battlesController.getBattlesList);
+battlesRouter.put("/:id", battlesController.updateBattle);
+battlesRouter.post("/arrange", battlesController.arrangeTeamsIntoBattles);
 
 export default battlesRouter;

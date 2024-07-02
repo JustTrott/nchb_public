@@ -1,29 +1,35 @@
 import mongoose from "mongoose";
 
-interface IStandings extends mongoose.Document {
-	teamId: number;
-	QualPoints: number;
-	Tours: [
+export interface IStandings extends mongoose.Document {
+	name: string;
+	league: "junior" | "senior";
+	qualPoints: number;
+	tours: [
 		{
-			Number: number;
-			Points: number;
+			number: number;
+			points: number;
 			CB: number;
 		}
 	];
-	Total: number;
+	total: number;
+	disqualified: boolean;
+	specificTeams: IStandings[];
 }
 
 const standingsSchema: mongoose.Schema = new mongoose.Schema({
-	teamId: { type: String, required: true },
-	QualPoints: { type: Number, required: true },
-	Tours: {type: [
+	name: { type: String, required: true, unique: true, index: true},
+	league: { type: String, required: true },
+	qualPoints: { type: Number, required: true },
+	tours: {type: [
 		{
-			Number: { type: Number },
-			Points: { type: Number },
+			number: { type: Number },
+			points: { type: Number },
 			CB: { type: Number },
 		},
 	], default: []},
-	Total: { type: Number },
+	total: { type: Number, default: 0 },
+	disqualified: { type: Boolean, default: false },
+	specificTeams: { type: [mongoose.Schema.Types.ObjectId], ref: "Standings", default: [] }
 });
 
 const Standings = mongoose.model<IStandings>("Standings", standingsSchema);

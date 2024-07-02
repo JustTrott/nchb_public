@@ -1,12 +1,25 @@
 import { Router } from 'express';
-import userRouter from './user/user-router';
+import standingsRouter from './routes/standingsRoutes';
+import battlesRouter from './routes/battlesRoutes';
+import Battles from './models/battlesModel';
+import Standings from './models/standingsModel';
+import parseParticipants from './participantParser';
 // other routers can be imported here
 
 const globalRouter = Router();
 
 // Use the userRouter for user-related routes
-globalRouter.use(userRouter);
-
+globalRouter.use('/standings/', standingsRouter);
+globalRouter.use('/battles/', battlesRouter);
+globalRouter.post('/reset', async (req, res) => {
+	await Standings.deleteMany({});
+	await Battles.deleteMany({});
+	const teams = await parseParticipants();
+	await Standings.insertMany(teams);
+	console.log('Reset successful!');
+	res.send('Reset successful!');
+});
+globalRouter.use('/', (req, res) => { res.send('Welcome to the API!'); });
 // other routers can be added here
 
 export default globalRouter;
