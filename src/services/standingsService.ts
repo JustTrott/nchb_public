@@ -1,7 +1,7 @@
 import Standings, { IStandings } from '../models/standingsModel';
 import Battles, { IBattles } from '../models/battlesModel';
 import { CreateStandingDto } from '../dtos/CreateStanding.dot';
-import { getNearestStandings } from '../utils';
+import { getNearestStandings, getSortedStandings } from '../utils';
 
 
 class StandingsService {
@@ -11,7 +11,7 @@ class StandingsService {
 	}
 	
 	async getStandingsByLeague(league: string) {
-		return await Standings.find({ league }).sort({total: -1, "tours.CB": -1}).exec();
+		return await getSortedStandings(league);
 	}
 	
 	async createStanding (standing: CreateStandingDto) {
@@ -97,6 +97,7 @@ class StandingsService {
 	
 	async startNewTour(league: string) {
 		const standings = await this.getStandingsByLeague(league);
+		console.log(standings);
 		const newTour = standings[0].tours.length + 1;
 		standings.forEach(async standing => {
 			standing.tours.push({ number: newTour, points: 0, CB: 0 });

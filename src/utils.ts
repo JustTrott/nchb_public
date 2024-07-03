@@ -3,8 +3,7 @@ import Standings, { IStandings } from './models/standingsModel';
 export const getSortedStandings = async (league: string): Promise<IStandings[]> => {
 	try {
 		// Find and sort standings
-		const standings = await Standings.find({ league }).sort({total: -1, "tours.CB": -1}).exec();
-		
+		const standings = await Standings.find({ league }).sort({total: -1, "tours.CB": -1, qualPoints: -1}).exec();
 		const nonDisqualifiedStandings = standings.filter(standing => !standing.disqualified);
 		return nonDisqualifiedStandings;
 	} catch (error) {

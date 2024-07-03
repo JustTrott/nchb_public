@@ -15,7 +15,9 @@ globalRouter.post('/reset', async (req, res) => {
 	await Standings.deleteMany({});
 	await Battles.deleteMany({});
 	const teams = await parseParticipants();
-	await Standings.insertMany(teams);
+	// remove all teams with any field that is undefined or null
+	const filteredTeams = teams.filter(team => Object.values(team).every(value => value !== undefined && value !== null));
+	await Standings.insertMany(filteredTeams);
 	console.log('Reset successful!');
 	res.send('Reset successful!');
 });
