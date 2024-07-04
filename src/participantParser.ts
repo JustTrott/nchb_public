@@ -14,8 +14,8 @@ interface Participant {
 
 async function parseParticipants(): Promise<Participant[]>
 {
-	const spreadsheetId = "1Uc6rHz9mqVQVW12p_7UXeB9s0nO_c1DJR6UMtuukrJU";
-	const GId = "2055939208";
+	const spreadsheetId = "1i5AYjg6eRziiwn8XY9X-_DGYAV1Kv5y2NyqjK_2woZ4";
+	const GId = "2121330770";
 
 	const options = { sheetId: GId };
 
